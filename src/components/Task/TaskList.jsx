@@ -1,20 +1,18 @@
 import React, { useState } from 'react'
 import { useDataContext } from '../../context/data-context'
 
+const FORM_STATUS = {
+  ADD: 'ADD',
+  UPDATE: 'UPDATE',
+}
+
 const TaskList = () => {
   const [item, setItem] = useState('')
   const [status, setStatus] = useState(false)
+  const [formStatus, setFormStatus] = useState(FORM_STATUS.ADD)
+  const [docId, setDocId] = useState('')
 
-  const { loading, tasks, addTask } = useDataContext()
-
-  const handlClick = () => {
-    if (item) {
-      addTask({ item, status })
-
-      setItem('')
-      setStatus(false)
-    }
-  }
+  const { loading, tasks, addTask, deleteTask, updateTask } = useDataContext()
 
   return (
     <>
@@ -36,21 +34,54 @@ const TaskList = () => {
             type='checkbox'
           />
         </div>
-        <button onClick={() => handlClick()} className='btn btn-sm btn-success'>
-          Add Task
+        <button
+          onClick={() => {
+            if (formStatus === FORM_STATUS.ADD && item) {
+              addTask({ item, status })
+            } else if (formStatus === FORM_STATUS.UPDATE && item && docId) {
+              updateTask(docId, { item, status })
+            }
+            setItem('')
+            setStatus(false)
+            setDocId('')
+            setFormStatus(FORM_STATUS.ADD)
+          }}
+          className={
+            formStatus === FORM_STATUS.ADD ? 'btn btn-sm btn-success' : 'btn btn-sm btn-warning'
+          }
+        >
+          {formStatus === FORM_STATUS.ADD ? 'Add Task ' : 'Update Task'}
         </button>
       </section>
+
+      {loading && <div className='spinner-border'></div>}
 
       <section className='list-group'>
         {tasks.length > 0 &&
           tasks.map(({ docId, item, status }) => {
             return (
               <article
-                className='list-group-item'
+                className='list-group-item d-flex justify-content-between align-items-center'
                 style={{ textDecoration: status ? 'line-through' : '' }}
                 key={docId}
               >
                 {item}
+                <div className='btn-group'>
+                  <button
+                    onClick={() => {
+                      setItem(item)
+                      setStatus(status)
+                      setDocId(docId)
+                      setFormStatus(FORM_STATUS.UPDATE)
+                    }}
+                    className='btn btn-sm btn-info'
+                  >
+                    Edit
+                  </button>
+                  <button onClick={() => deleteTask(docId)} className='btn btn-sm btn-danger'>
+                    x
+                  </button>
+                </div>
               </article>
             )
           })}

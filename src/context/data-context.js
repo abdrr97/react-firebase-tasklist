@@ -7,6 +7,7 @@ import {
   collection,
   onSnapshot,
   serverTimestamp,
+  doc,
 } from 'firebase/firestore'
 
 const DataContext = createContext()
@@ -27,27 +28,27 @@ const DataProvider = ({ children }) => {
     if (!_id) return
 
     setLoading(true)
-    await deleteDoc(collection(db, 'tasks', _id))
+    await deleteDoc(doc(db, 'tasks', _id))
     setLoading(false)
   }
   const updateTask = async (_id, _newTask) => {
     if (!_id) return
 
     setLoading(true)
-    await updateDoc(collection(db, 'tasks', _id), _newTask)
+    await updateDoc(doc(db, 'tasks', _id), _newTask)
     setLoading(false)
   }
-  const getTasks = async () => {
+  const getTasks = () => {
     setLoading(true)
-    await onSnapshot(collection(db, 'tasks'), (_) => {
-      const _tasks = _.docs
-        .map((doc) => {
-          return {
-            docId: doc.id,
-            ...doc.data(),
-          }
-        })
-        .sort((x, y) => y.created_at - x.created_at)
+    // orderBy()
+    onSnapshot(collection(db, 'tasks'), (snapshot) => {
+      const _tasks = snapshot.docs.map((doc) => {
+        return {
+          docId: doc.id,
+          ...doc.data(),
+        }
+      })
+      // .sort((x, y) => y.created_at - x.created_at)
 
       setTasks(_tasks)
     })
