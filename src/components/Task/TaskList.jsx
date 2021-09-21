@@ -1,3 +1,4 @@
+import moment from 'moment'
 import React, { useState } from 'react'
 import { useDataContext } from '../../context/data-context'
 
@@ -28,9 +29,8 @@ const TaskList = () => {
           />
           <input
             className='form-check mx-3 mb-3'
-            value={status}
             checked={Boolean(status)}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) => setStatus(Boolean(e.target.checked))}
             type='checkbox'
           />
         </div>
@@ -58,29 +58,33 @@ const TaskList = () => {
 
       <section className='list-group'>
         {tasks.length > 0 &&
-          tasks.map(({ docId, item, status }) => {
+          tasks.map(({ docId, item, created_at, status }) => {
             return (
               <article
                 className='list-group-item d-flex justify-content-between align-items-center'
-                style={{ textDecoration: status ? 'line-through' : '' }}
                 key={docId}
               >
-                {item}
-                <div className='btn-group'>
-                  <button
-                    onClick={() => {
-                      setItem(item)
-                      setStatus(status)
-                      setDocId(docId)
-                      setFormStatus(FORM_STATUS.UPDATE)
-                    }}
-                    className='btn btn-sm btn-info'
-                  >
-                    Edit
-                  </button>
-                  <button onClick={() => deleteTask(docId)} className='btn btn-sm btn-danger'>
-                    x
-                  </button>
+                <p style={{ textDecoration: status ? 'line-through' : '' }}>{item}</p>
+                <div>
+                  <small className='fw-lighter small fst-italic mx-2'>
+                    {moment(created_at.toDate(), 'YYYYMMDD').fromNow()}
+                  </small>
+                  <div className='btn-group'>
+                    <button
+                      onClick={() => {
+                        setItem(item)
+                        setStatus(status)
+                        setDocId(docId)
+                        setFormStatus(FORM_STATUS.UPDATE)
+                      }}
+                      className='btn btn-sm btn-info'
+                    >
+                      Edit
+                    </button>
+                    <button onClick={() => deleteTask(docId)} className='btn btn-sm btn-danger'>
+                      x
+                    </button>
+                  </div>
                 </div>
               </article>
             )
